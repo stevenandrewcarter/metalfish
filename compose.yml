@@ -1,0 +1,11 @@
+---
+services:
+  sushy:
+    image: quay.io/metal3-io/sushy-tools
+    privileged: true
+    volumes:
+      - ./sushy:/etc/sushy:z
+      - /var/run/libvirt:/var/run/libvirt
+    ports:
+      - "8000:8000"
+    command: "sushy-emulator -i :: -p 8000 --config /etc/sushy/sushy-emulator.conf"
