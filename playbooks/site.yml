@@ -1,0 +1,31 @@
+---
+- name: Configure local environment for Metal3
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: List available networks
+      community.libvirt.virt_net:
+        command: list_nets
+      register: current_networks
+
+    - name: Debug networks
+      ansible.builtin.debug:
+        var: current_networks
+
+    - name: Define a new network
+      community.libvirt.virt_net:
+        command: define
+        name: br_nat
+        xml: '{{ lookup("template", "files/network/bridge.xml.j2") }}'
+      when: "'baremetal' not in current_networks.list_nets"
+
+    - name: Start a network
+      community.libvirt.virt_net:
+        command: create
+        name: baremetal
+
+    - name: Define vm from xml and set autostart
+      community.libvirt.virt:
+        command: define
+        xml: "{{ lookup('template', 'files/domain/vbmc-node.xml.j2') }}"

@@ -1,13 +1,14 @@
-<domain type="qemu">
-  <name>vbmc-node</name>
-  <uuid>407e3968-3ff1-4934-8425-e2a0d4e5e4f9</uuid>
+<domain type="kvm">
+  <name>bmh-vm-01</name>
+  <uuid>3fe94f39-a1c2-4c07-8ceb-2cc3132d7285</uuid>
+  <description>Virtualized BareMetalHost</description>
   <metadata>
     <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
-      <libosinfo:os id="http://fedoraproject.org/fedora/28"/>
+      <libosinfo:os id="http://ubuntu.com/ubuntu/22.04"/>
     </libosinfo:libosinfo>
   </metadata>
-  <memory>1048576</memory>
-  <currentMemory>1048576</currentMemory>
+  <memory>4194304</memory>
+  <currentMemory>4194304</currentMemory>
   <vcpu>2</vcpu>
   <os>
     <type arch="x86_64" machine="q35">hvm</type>
@@ -17,6 +18,7 @@
     <acpi/>
     <apic/>
   </features>
+  <cpu mode="host-passthrough"/>
   <clock offset="utc">
     <timer name="rtc" tickpolicy="catchup"/>
     <timer name="pit" tickpolicy="delay"/>
@@ -30,7 +32,7 @@
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type="file" device="disk">
       <driver name="qemu" type="qcow2" discard="unmap"/>
-      <source file="/home/steven/.local/share/libvirt/images/vbmc-node.qcow2"/>
+      <source file="/var/lib/libvirt/images/bmh-vm-01-1.qcow2"/>
       <target dev="vda" bus="virtio"/>
     </disk>
     <controller type="usb" model="qemu-xhci" ports="15"/>
@@ -49,20 +51,17 @@
     <controller type="pci" model="pcie-root-port"/>
     <controller type="pci" model="pcie-root-port"/>
     <controller type="pci" model="pcie-root-port"/>
-    <interface type="user">
-      <mac address="52:54:00:9f:ca:aa"/>
+    <interface type="network">
+      <source network="baremetal"/>
+      <mac address="00:60:2f:31:81:01"/>
       <model type="virtio"/>
     </interface>
+    <serial type="pty"/>
     <console type="pty"/>
     <channel type="unix">
       <source mode="bind"/>
       <target type="virtio" name="org.qemu.guest_agent.0"/>
     </channel>
-    <input type="tablet" bus="usb"/>
-    <graphics type="vnc" port="-1"/>
-    <video>
-      <model type="virtio"/>
-    </video>
     <memballoon model="virtio"/>
     <rng model="virtio">
       <backend model="random">/dev/urandom</backend>
