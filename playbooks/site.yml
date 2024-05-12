@@ -3,28 +3,18 @@
   hosts: all
   connection: local
   gather_facts: false
+  pre_tasks:
+    - name: Load virsh environment
+      ansible.builtin.include_tasks: "{{ item }}"
+      loop: ["tasks/list_networks.yml", "tasks/list_virtual_machines.yml"]
   tasks:
-    - name: List Networks
-      ansible.builtin.include_tasks:
-        tasks/list_networks.yml
-
-    - name: Debug networks
-      ansible.builtin.debug:
-        var: current_networks
-
     - name: Create a new network
       when: network_name not in current_networks.list_nets
-      block:
-        - name: Define a new network
-          community.libvirt.virt_net:
-            command: define
-            name: "{{ network_name }}"
-            xml: '{{ lookup("template", "files/network/bridge.xml.j2") }}'
-
-        - name: Start a network
-          community.libvirt.virt_net:
-            command: create
-            name: "{{ network_name }}"
+      community.libvirt.virt_net:
+        name: "{{ network_name }}"
+        command: define
+        xml: '{{ lookup("template", "files/network/bridge.xml.j2") }}'
+      loop: ["define", "create"]
 
     - name: Define vm from xml and set autostart
       community.libvirt.virt:
