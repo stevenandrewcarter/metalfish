@@ -1,0 +1,5 @@
+---
+- name: Retrieve all virsh networks
+  community.libvirt.virt_net:
+    command: list_nets
+  register: current_networks

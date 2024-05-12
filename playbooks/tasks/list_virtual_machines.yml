@@ -1,0 +1,5 @@
+---
+- name: List all Virtual Machines
+  community.libvirt.virt:
+    command: list_vms
+  register: current_virtual_machines

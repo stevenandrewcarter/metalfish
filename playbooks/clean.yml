@@ -1,0 +1,50 @@
+---
+- name: Clean local environment of Metal3
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Load virsh networks
+      ansible.builtin.include_tasks: tasks/list_networks.yml
+
+    - name: Load virsh virtual machines
+      ansible.builtin.include_tasks: tasks/list_virtual_machines.yml
+
+    - name: Debug virtual machines
+      ansible.builtin.debug:
+        var: current_virtual_machines
+
+    - name: Stop a network
+      community.libvirt.virt_net:
+        command: destroy
+        name: "{{ network_name }}"
+      when: network_name in current_networks.list_nets
+
+    - name: Undefine a network
+      community.libvirt.virt_net:
+        command: undefine
+        name: "{{ network_name }}"
+
+    - name: Clean up Virtual Machine
+      when: vm_name in current_virtual_machines.list_vms
+      block:
+        - name: Get Virtual Machine Status
+          community.libvirt.virt:
+            name: "{{ vm_name }}"
+            command: status
+          register: current_status
+
+        - name: Debug Virtual Machine
+          ansible.builtin.debug:
+            var: current_status
+
+        - name: Stop the Virtual Machine
+          community.libvirt.virt:
+            command: destroy
+            name: "{{ vm_name }}"
+          when: current_status.status != "shutdown"
+
+        - name: Undefine the Virtual Machine
+          community.libvirt.virt:
+            command: undefine
+            name: "{{ vm_name }}"
