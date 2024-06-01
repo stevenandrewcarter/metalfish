@@ -1,0 +1,28 @@
+# Install and configure the sushy emulator locally. The emulator will be listening on the OOB network only.
+# The sushy emulator will be backed against a local libvirt instance.
+# NB: We will assume everything will be executed against the root user on the host. Since these are lab environments it
+# should not cause a problem in doing everything as root!
+- name: Configure environment for MetalFish
+  hosts: all
+  connection: local  
+  become: true
+  pre_tasks:
+    - name: Add Docker Repository
+      block:
+        - name: Retrieve GPG Key
+          ansible.builtin.get_url:
+            url: https://download.docker.com/linux/ubuntu/gpg
+            dest: /etc/apt/keyrings/docker.asc
+        - name: Add Docker repository
+          ansible.builtin.apt_repository:
+            repo: "deb [arch={{ ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+            stat  e: present
+
+    - name: Install all required packages
+      ansible.builtin.package:
+        name:
+          - docker
+          - qemu-kvm
+          - libvirt-daemon-system
+          - avahi-daemon
+          - libnss-mdns
