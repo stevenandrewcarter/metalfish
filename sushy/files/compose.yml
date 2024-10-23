@@ -4,7 +4,7 @@ services:
     image: quay.io/metal3-io/sushy-tools
     privileged: true
     volumes:
-      - ./sushy:/etc/sushy:z
+      - ./sushy-emulator.conf:/etc/sushy/sushy-emulator.conf:z
       - /var/run/libvirt:/var/run/libvirt
     ports:
       - "8000:8000"

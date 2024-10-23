@@ -12,13 +12,14 @@ Vagrant.configure("2") do |config|
       c.vm.box = "ubuntu/mantic64"
       c.vm.hostname = "node#{i}"
       c.vm.network :private_network, ip: "10.0.0.#{i + 10}"
+      # c.vm.network "forwarded_port", guest: 8000, host: 8000
       c.vm.provision "ansible_local" do |ansible|
         ansible.playbook = "sushy/site.yml"
       end
       c.vm.provider "virtualbox" do |v|
         v.customize ["modifyvm", :id, "--groups", "/baremetal"]      
         v.gui = false        
-        v.memory = "512"
+        v.memory = "1024"
       end
     end
   end
