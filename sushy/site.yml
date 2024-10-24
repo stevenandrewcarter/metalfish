@@ -3,53 +3,36 @@
 # NB: We will assume everything will be executed against the root user on the host. Since these are lab environments it
 # should not cause a problem in doing everything as root!
 - name: Configure environment for MetalFish
-  hosts: all
-  connection: local
+  hosts: localhost
   become: true
-  pre_tasks:
-    - name: Add Docker Repository
-      block:
-        - name: Add Docker GPG apt Key
-          ansible.builtin.apt_key:
-            url: https://download.docker.com/linux/ubuntu/gpg
-            state: present
-        - name: Add Docker repository
-          ansible.builtin.apt_repository:
-            # repo: "deb [arch={{ ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-            repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-            state: present
-
-    - name: Install all required packages
-      ansible.builtin.package:
-        name:
-          - docker-ce
-          - qemu-kvm
-          - libvirt-daemon-system
-          - avahi-daemon
-          - libnss-mdns
-  
+  roles:
+    - docker
+    - libvirt
   tasks:
     - name: Create Sushy directory
       ansible.builtin.file:
         path: "{{ ansible_env.HOME }}/sushy"
         state: directory
-        mode: '0755'
-    
+        mode: "0755"
+
     - name: Copy sushy configuration to the sushy directory
       ansible.builtin.copy:
         src: "files/{{ item }}"
         dest: "{{ ansible_env.HOME }}/sushy"
-        mode: '0644'
-      loop: ['sushy-emulator.conf', 'compose.yml']    
-    
-    - name: Define vm from xml and set autostart
-      community.libvirt.virt:
-        command: define
-        xml: "{{ lookup('template', 'files/domain/vbmc-node.xml.j2') }}"
-    
+        mode: "0644"
+      loop: ["sushy-emulator.conf", "compose.yml"]
+
     - name: Execute docker compose
       ansible.builtin.command: docker compose up -d
       args:
-        chdir: "{{ ansible_env.HOME }}/sushy"    
+        chdir: "{{ ansible_env.HOME }}/sushy"
 
-        
+- name: Define MetalFish servers
+  hosts: metalfish
+  gather_facts: false
+  tasks:
+    - name: Define vm from xml and set autostart
+      delegate_to: localhost
+      community.libvirt.virt:
+        command: define
+        xml: "{{ lookup('template', 'files/domain/vbmc-node.xml.j2') }}"

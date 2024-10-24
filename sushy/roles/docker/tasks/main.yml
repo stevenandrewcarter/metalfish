@@ -1,0 +1,22 @@
+- name: Check If Docker Is Installed
+  ansible.builtin.command: docker --version
+  register: docker_valid
+  changed_when: false
+  ignore_errors: true
+
+- name: Add Docker Repository
+  when: docker_valid.failed
+  block:
+    - name: Add Docker GPG apt Key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    - name: Add Docker repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker package
+      ansible.builtin.package:
+        name:
+          - docker-ce

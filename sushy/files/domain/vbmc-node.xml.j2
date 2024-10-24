@@ -1,15 +1,15 @@
 <domain type="kvm">
-  <name>{{ vm_name }}</name>
-  <uuid>3fe94f39-a1c2-4c07-8ceb-2cc3132d7285</uuid>
+  <name>{{ inventory_hostname }}</name>
+  <uuid>{{ inventory_hostname | to_uuid }}</uuid>
   <description>Virtualized BareMetalHost</description>
   <metadata>
     <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
       <libosinfo:os id="http://ubuntu.com/ubuntu/22.04"/>
     </libosinfo:libosinfo>
   </metadata>
-  <memory>4194304</memory>
-  <currentMemory>4194304</currentMemory>
-  <vcpu>2</vcpu>
+  <memory>{{ memory }}</memory>
+  <currentMemory>{{ memory }}</currentMemory>
+  <vcpu>{{ vcpu }}</vcpu>
   <os>
     <type arch="x86_64" machine="q35">hvm</type>
     <boot dev="hd"/>
